@@ -1,6 +1,6 @@
 
-LookAt 400 0 0   0 0 0   0 0 1
-Rotate -5 0 0 1
+LookAt 400 -200 0   0 0 0   0 0 1
+#Rotate -5 0 0 1
 Camera "perspective" "float fov" [39]
 Film "image"  
 "integer xresolution" [400] "integer yresolution" [400]
@@ -16,10 +16,10 @@ WorldBegin
 #light
 AttributeBegin
 Material "matte" "color Kd" [0 0 0]
-Translate 150 0  30
-Translate 0 -120 0
-AreaLightSource "area"  "color L" [2000 2000 2000] "integer nsamples" [8]
-Shape "sphere" "float radius" [3]
+Translate 150 0  200
+Translate 0 120 0
+AreaLightSource "area"  "color L" [100 100 100] "integer nsamples" [8]
+Shape "sphere" "float radius" [20]
 AttributeEnd
 
 #floor
@@ -37,16 +37,29 @@ Shape "trianglemesh" "point P" [ -400 -1000 -1000   -400 1000 -1000   -400 1000 
         "integer indices" [ 0 1 2 2 3 0]
 AttributeEnd
 
+#glass
+AttributeBegin
+  Translate -150 -50 0
+  Rotate  90 0 1 0
+  Material "mirror"
+  Shape "disk" "float radius" 100
+AttributeEnd
+
+
+#fish
 AttributeBegin
 Scale 25 25 25
 Rotate 90 1 0 0
 Translate 0 0 0
     Texture "normalmap" "float" "imagemap"
         "string filename" ["textures/BETTA_Normal_OpenGL.png"]
+    Texture "opacitymap" "color" "imagemap"
+        "string filename" ["textures/BETTA_Opacity_fin_opaque.png"]
     Texture "colormap" "color" "imagemap"
-        "string filename" ["textures/BETTA_Base_Color.png"]
+        "string filename" ["textures/BETTA_Base_Color_desatu.png"]
     
-    Material "uber"  "color Ks" [0 0 0] "color Kt" [1 1 1] "texture Kd" "colormap" "float eta" 1 "texture bumpmap" "normalmap"
+    Material "uber" "texture Kd" "colormap" "texture bumpmap" "normalmap" "texture opacity" "opacitymap"
+    #Material "matte"
     Include "geometry/betta.pbrt" 
 AttributeEnd
 WorldEnd
