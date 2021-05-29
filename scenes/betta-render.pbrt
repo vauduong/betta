@@ -13,6 +13,7 @@ Integrator "path"
 
 WorldBegin
 
+#light
 AttributeBegin
 Material "matte" "color Kd" [0 0 0]
 Translate 150 0  30
@@ -21,9 +22,12 @@ AreaLightSource "area"  "color L" [2000 2000 2000] "integer nsamples" [8]
 Shape "sphere" "float radius" [3]
 AttributeEnd
 
-
+#floor
 AttributeBegin
-  Material "matte" "color Kd" [.5 .5 .8]
+  Texture "checks" "spectrum" "checkerboard"
+          "float uscale" [8] "float vscale" [8]
+          "rgb tex1" [.1 .1 .1] "rgb tex2" [.8 .8 .8]
+  Material "matte" "texture Kd" "checks"
   Translate 0 0 -140
 Shape "trianglemesh" "point P" [ -1000 -1000 0 1000 -1000 0 1000 1000 0 -1000 1000 0 ]
       "float uv" [ 0 0 5 0 5 5 0 5 ]
@@ -37,9 +41,12 @@ AttributeBegin
 Scale 25 25 25
 Rotate 90 1 0 0
 Translate 0 0 0
-    Include "geometry/betta.pbrt"
-    Material "plastic" "color Ks" [.3 .3 .3] "color Kd" [.4 .5 .4]
-        "float roughness" [.15] 
-
+    Texture "normalmap" "float" "imagemap"
+        "string filename" ["textures/BETTA_Normal_OpenGL.png"]
+    Texture "colormap" "color" "imagemap"
+        "string filename" ["textures/BETTA_Base_Color.png"]
+    
+    Material "uber" "color Kt" [1 1 1] "float eta" [1 1 1.1] "texture bumpmap" "normalmap"
+    Include "geometry/betta.pbrt" 
 AttributeEnd
 WorldEnd
