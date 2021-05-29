@@ -46,7 +46,7 @@ Translate 0 0 0
     Texture "colormap" "color" "imagemap"
         "string filename" ["textures/BETTA_Base_Color.png"]
     
-    Material "uber" "color Kt" [1 1 1] "float eta" [1 1 1.1] "texture bumpmap" "normalmap"
+    Material "uber"  "color Ks" [0 0 0] "color Kt" [1 1 1] "texture Kd" "colormap" "float eta" 1 "texture bumpmap" "normalmap"
     Include "geometry/betta.pbrt" 
 AttributeEnd
 WorldEnd
