@@ -7,7 +7,7 @@ Film "image"
     "string filename" "betta-render.exr"
 
 
-Sampler "halton" "integer pixelsamples" [8]
+Sampler "halton" "integer pixelsamples" [32]
 
 Integrator "path"
 
@@ -39,10 +39,15 @@ AttributeEnd
 
 #glass
 AttributeBegin
-  Translate -150 -50 0
-  Rotate  90 0 1 0
-  Material "mirror"
-  Shape "disk" "float radius" 100
+  Material "glass"
+  #wall
+  Shape "trianglemesh" "point P" [ -200 -500 -1000   -200 500 -1000   -200 500 1000 -200 -500 1000 ]
+     "float uv" [ 0 0 5 0 5 5 0 5 ]
+      "integer indices" [ 0 1 2 2 3 0]
+  #ceiling
+  Shape "trianglemesh" "point P" [ -1000 -1000 200 1000 -1000 200 1000 1000 200 -1000 1000 200 ]
+      "float uv" [ 0 0 5 0 5 5 0 5 ]
+	"integer indices" [ 0 1 2 2 3 0]
 AttributeEnd
 
 
@@ -58,8 +63,7 @@ Translate 0 0 0
     Texture "colormap" "color" "imagemap"
         "string filename" ["textures/BETTA_Base_Color_desatu.png"]
     
-    Material "uber" "texture Kd" "colormap" "texture bumpmap" "normalmap" "texture opacity" "opacitymap"
-    #Material "matte"
+    Material "uber" "texture color" "colormap" "float eta" 1 "texture bumpmap" "normalmap" "texture opacity" "opacitymap"
     Include "geometry/betta.pbrt" 
 AttributeEnd
 WorldEnd
