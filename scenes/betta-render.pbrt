@@ -7,7 +7,7 @@ Film "image"
     "string filename" "betta-render.exr"
 
 
-Sampler "halton" "integer pixelsamples" [32]
+Sampler "halton" "integer pixelsamples" [128]
 
 Integrator "path"
 
@@ -16,10 +16,10 @@ WorldBegin
 #light
 AttributeBegin
 Material "matte" "color Kd" [0 0 0]
-Translate 150 0  100
+Translate 150 0  200
 Translate 0 120 0
 AreaLightSource "area"  "color L" [30 30 30] "integer nsamples" [8]
-Shape "sphere" "float radius" [20]
+Shape "sphere" "float radius" [40]
 AttributeEnd
 
 #floor
@@ -58,7 +58,7 @@ Translate 0 0 0
     Texture "colormap" "color" "imagemap"
         "string filename" ["textures/BETTA_Base_Color_desatu.png"]
     
-    Material "fish" "texture color" "colormap" "color Kt" [0.8 0.8 0.8] "float eta" 1 "texture bumpmap" "normalmap" "texture opacity" "opacitymap"
+    Material "fish" "texture color" "colormap"  "texture bumpmap" "normalmap" "texture opacity" "opacitymap" "color sigma_a" [1.75 1.5 2.90] "color sigma_s" [0.64 0.235 0.5]
     Include "geometry/betta.pbrt" 
 AttributeEnd
 WorldEnd
