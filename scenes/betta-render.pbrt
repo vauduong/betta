@@ -18,7 +18,7 @@ AttributeBegin
 Material "matte" "color Kd" [0 0 0]
 Translate 150 0  100
 Translate 0 120 0
-AreaLightSource "area"  "color L" [100 100 100] "integer nsamples" [8]
+AreaLightSource "area"  "color L" [30 30 30] "integer nsamples" [8]
 Shape "sphere" "float radius" [20]
 AttributeEnd
 

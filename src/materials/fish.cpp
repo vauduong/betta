@@ -107,16 +107,32 @@ void FishMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
         }
     }
 
-    Spectrum mfree = op * scale * mfp->Evaluate(*si).Clamp();
-    Spectrum kd = op * Kd->Evaluate(*si).Clamp();
-    Spectrum sig_a, sig_s;
-    SubsurfaceFromDiffuse(table, kd, mfree, &sig_a, &sig_s);
+    Spectrum sig_a = scale * sigma_a->Evaluate(*si).Clamp();
+    Spectrum sig_s = scale * sigma_s->Evaluate(*si).Clamp();
     si->bssrdf = ARENA_ALLOC(arena, TabulatedBSSRDF)(*si, this, mode, eta,
                                                      sig_a, sig_s, table);
 }
 
 FishMaterial *CreateFishMaterial(const TextureParams &mp) {
     Float Kd[3] = {.5, .5, .5};
+    Float sig_a_rgb[3] = {.0011f, .0024f, .014f},
+          sig_s_rgb[3] = {2.55f, 3.21f, 3.77f};
+    Spectrum sig_a = Spectrum::FromRGB(sig_a_rgb),
+             sig_s = Spectrum::FromRGB(sig_s_rgb);
+    std::string name = mp.FindString("name");
+    bool found = GetMediumScatteringProperties(name, &sig_a, &sig_s);
+    Float g = mp.FindFloat("g", 0.0f);
+    if (name != "") {
+        if (!found)
+            Warning("Named material \"%s\" not found.  Using defaults.",
+                    name.c_str());
+        else
+            g = 0; /* Enforce g=0 (the database specifies reduced scattering
+                      coefficients) */
+    }
+    std::shared_ptr<Texture<Spectrum>> sigma_a, sigma_s;
+    sigma_a = mp.GetSpectrumTexture("sigma_a", sig_a);
+    sigma_s = mp.GetSpectrumTexture("sigma_s", sig_s);
     std::shared_ptr<Texture<Spectrum>> kd =
         mp.GetSpectrumTexture("Kd", Spectrum::FromRGB(Kd));
     std::shared_ptr<Texture<Spectrum>> mfp =
@@ -137,10 +153,10 @@ FishMaterial *CreateFishMaterial(const TextureParams &mp) {
         mp.GetSpectrumTexture("color", Spectrum(0.5f));
     Float eta = mp.FindFloat("eta", 1.33f);
     Float scale = mp.FindFloat("scale", 1.0f);
-    Float g = mp.FindFloat("g", 0.0f);
     bool remapRoughness = mp.FindBool("remaproughness", true);
-    return new FishMaterial(scale, kd, kr, kt, mfp, g, eta, roughu, roughv,
-                            bumpMap, opacity, color, remapRoughness);
+    return new FishMaterial(scale, sigma_a, sigma_s, kd, kr, kt, mfp, g, eta,
+                            roughu, roughv, bumpMap, opacity, color,
+                            remapRoughness);
 }
 
 }  // namespace pbrt
