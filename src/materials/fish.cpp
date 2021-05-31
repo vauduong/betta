@@ -33,8 +33,6 @@ void FishMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
     // normalize lum. to isolate hue+sat
     Spectrum Ctint = lum > 0 ? (c / lum) : Spectrum(1.);
     BxDF *diff = ARENA_ALLOC(arena, LambertianReflection)(c);
-    // si->bsdf->Add(diff);
-    si->bsdf = ARENA_ALLOC(arena, BSDF)(*si, eta);
 
     Spectrum R = op * Kd->Evaluate(*si).Clamp();
     Spectrum T = op * Kt->Evaluate(*si).Clamp();
