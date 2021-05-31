@@ -1,35 +1,3 @@
-
-/*
-    pbrt source code is Copyright(c) 1998-2016
-                        Matt Pharr, Greg Humphreys, and Wenzel Jakob.
-
-    This file is part of pbrt.
-
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions are
-    met:
-
-    - Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-
-    - Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
-    IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
-    TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-    PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-    HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
- */
-
 // materials/fish.cpp*
 #include "materials/fish.h"
 
@@ -47,8 +15,8 @@ void FishMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
                                               TransportMode mode,
                                               bool allowMultipleLobes) const {
     // Perform bump mapping with _bumpMap_, if present
-    if (bumpMap) Bump(bumpMap, si);
-
+//    if (bumpMap) Bump(bumpMap, si);
+/*
     // opacity and intialize BSDF
     Spectrum op = opacity->Evaluate(*si).Clamp();
     Spectrum t = (-op + Spectrum(1.f)).Clamp();
@@ -59,8 +27,8 @@ void FishMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
     } else
         si->bsdf = ARENA_ALLOC(arena, BSDF)(*si, eta);
 
-    Spectrum R = op * Kr->Evaluate(*si).Clamp();
-    Spectrum T = op * Kt->Evaluate(*si).Clamp();
+    Spectrum R = Kr->Evaluate(*si).Clamp();
+    Spectrum T = Kt->Evaluate(*si).Clamp();
     Float urough = uRoughness->Evaluate(*si);
     Float vrough = vRoughness->Evaluate(*si);
 
@@ -70,8 +38,12 @@ void FishMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
     // normalize lum. to isolate hue+sat
     Spectrum Ctint = lum > 0 ? (c / lum) : Spectrum(1.);
     BxDF *diff = ARENA_ALLOC(arena, LambertianReflection)(c);
-    si->bsdf->Add(diff);
+    // si->bsdf->Add(diff);
+    si->bsdf = ARENA_ALLOC(arena, BSDF)(*si, eta);
+*/
 
+
+/*
     if (R.IsBlack() && T.IsBlack()) return;
 
     bool isSpecular = urough == 0 && vrough == 0;
@@ -97,26 +69,29 @@ void FishMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
                     R, distrib, fresnel));
         }
         if (!T.IsBlack()) {
-            if (isSpecular) {
+            if (isSpecular)
                 si->bsdf->Add(ARENA_ALLOC(arena, SpecularTransmission)(
                     T, 1.f, eta, mode));
-            } else {
+            else
                 si->bsdf->Add(ARENA_ALLOC(arena, MicrofacetTransmission)(
                     T, distrib, 1.f, eta, mode));
-            }
         }
     }
-
+*/
+/*
     Spectrum sig_a = scale * sigma_a->Evaluate(*si).Clamp();
     Spectrum sig_s = scale * sigma_s->Evaluate(*si).Clamp();
     si->bssrdf = ARENA_ALLOC(arena, TabulatedBSSRDF)(*si, this, mode, eta,
                                                      sig_a, sig_s, table);
+
+
+*/
 }
 
 FishMaterial *CreateFishMaterial(const TextureParams &mp) {
-    Float Kd[3] = {.5, .5, .5};
-    Float sig_a_rgb[3] = {.0011f, .0024f, .014f},
-          sig_s_rgb[3] = {2.55f, 3.21f, 3.77f};
+    Float Kd[3] = {1, 1, 1};
+    Float sig_a_rgb[3] = {.0014f, .0025f, .0142f}, //skim milk values
+          sig_s_rgb[3] = {.70f, 1.22f, 1.90f};
     Spectrum sig_a = Spectrum::FromRGB(sig_a_rgb),
              sig_s = Spectrum::FromRGB(sig_s_rgb);
     std::string name = mp.FindString("name");
@@ -130,6 +105,7 @@ FishMaterial *CreateFishMaterial(const TextureParams &mp) {
             g = 0; /* Enforce g=0 (the database specifies reduced scattering
                       coefficients) */
     }
+
     std::shared_ptr<Texture<Spectrum>> sigma_a, sigma_s;
     sigma_a = mp.GetSpectrumTexture("sigma_a", sig_a);
     sigma_s = mp.GetSpectrumTexture("sigma_s", sig_s);
