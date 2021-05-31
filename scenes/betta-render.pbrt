@@ -1,13 +1,13 @@
 
-LookAt 400 -200 0   0 0 0   0 0 1
-#Rotate -5 0 0 1
+LookAt 200 400 0   0 0 0   0 0 1
+Rotate -5 0 0 1
 Camera "perspective" "float fov" [39]
 Film "image"  
 "integer xresolution" [400] "integer yresolution" [400]
     "string filename" "betta-render.exr"
 
 
-Sampler "halton" "integer pixelsamples" [128]
+Sampler "halton" "integer pixelsamples" [16]
 
 Integrator "path"
 
@@ -39,8 +39,9 @@ AttributeEnd
 
 #mirror
 AttributeBegin
-  Translate -150 -50 0
+  Translate -150 -400 0
   Rotate  90 0 1 0
+  Rotate 90 1 0 0
   Material "mirror"
   Shape "disk" "float radius" 100
 AttributeEnd
@@ -52,13 +53,13 @@ Scale 25 25 25
 Rotate 90 1 0 0
 Translate 0 0 0
     Texture "normalmap" "float" "imagemap"
-        "string filename" ["textures/BETTA_Normal_OpenGL.png"]
+        "string filename" ["textures/BETTA_Normal_cleaned.png"]
     Texture "opacitymap" "color" "imagemap"
         "string filename" ["textures/BETTA_Opacity_gradient.png"]
     Texture "colormap" "color" "imagemap"
         "string filename" ["textures/BETTA_Base_Color_desatu.png"]
     
-    Material "fish" "texture color" "colormap"  "texture bumpmap" "normalmap" "texture opacity" "opacitymap" "color sigma_a" [1.75 1.5 2.90] "color sigma_s" [0.64 0.235 0.5]
+    Material "fish" "texture Kd" "colormap" "texture Kt" "colormap" "texture color" "colormap" "float eta" 1 "texture bumpmap" "normalmap" "texture opacity" "opacitymap" "float uroughness" 0 "float vroughness" 0
     Include "geometry/betta.pbrt" 
 AttributeEnd
 WorldEnd

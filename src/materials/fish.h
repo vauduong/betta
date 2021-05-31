@@ -50,9 +50,7 @@ namespace pbrt {
 class FishMaterial : public Material {
   public:
     // FishMaterial Public Methods
-    FishMaterial(Float scale, const std::shared_ptr<Texture<Spectrum>> &sigma_a,
-                 const std::shared_ptr<Texture<Spectrum>> &sigma_s,
-                 const std::shared_ptr<Texture<Spectrum>> &Kd,
+    FishMaterial(Float scale, const std::shared_ptr<Texture<Spectrum>> &Kd,
                  const std::shared_ptr<Texture<Spectrum>> &Kr,
                  const std::shared_ptr<Texture<Spectrum>> &Kt,
                  const std::shared_ptr<Texture<Spectrum>> &mfp, Float g,
@@ -64,8 +62,6 @@ class FishMaterial : public Material {
                  const std::shared_ptr<Texture<Spectrum>> &color,
                  bool remapRoughness)
         : scale(scale),
-          sigma_a(sigma_a),
-          sigma_s(sigma_s),
           Kd(Kd),
           Kr(Kr),
           Kt(Kt),
@@ -87,8 +83,7 @@ class FishMaterial : public Material {
   private:
     // FishMaterial Private Data
     Float scale;
-    std::shared_ptr<Texture<Spectrum>> Kd, Kr, Kt, mfp, color, opacity, sigma_a,
-        sigma_s;
+    std::shared_ptr<Texture<Spectrum>> Kd, Kr, Kt, mfp, color, opacity;
     std::shared_ptr<Texture<Float>> uRoughness, vRoughness;
     std::shared_ptr<Texture<Float>> bumpMap;
     Float eta;

@@ -59,11 +59,6 @@ void FishMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
     } else
         si->bsdf = ARENA_ALLOC(arena, BSDF)(*si, eta);
 
-    Spectrum R = op * Kr->Evaluate(*si).Clamp();
-    Spectrum T = op * Kt->Evaluate(*si).Clamp();
-    Float urough = uRoughness->Evaluate(*si);
-    Float vrough = vRoughness->Evaluate(*si);
-
     // diffuse
     Spectrum c = op * color->Evaluate(*si).Clamp();
     Float lum = c.y();
@@ -72,71 +67,31 @@ void FishMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
     BxDF *diff = ARENA_ALLOC(arena, LambertianReflection)(c);
     si->bsdf->Add(diff);
 
-    if (R.IsBlack() && T.IsBlack()) return;
+    Spectrum R = op * Kd->Evaluate(*si).Clamp();
+    Spectrum T = op * Kt->Evaluate(*si).Clamp();
+    Float roughu = uRoughness->Evaluate(*si);
+    Float roughv = vRoughness->Evaluate(*si);
 
-    bool isSpecular = urough == 0 && vrough == 0;
-    if (isSpecular && allowMultipleLobes) {
-        si->bsdf->Add(
-            ARENA_ALLOC(arena, FresnelSpecular)(R, T, 1.f, eta, mode));
-    } else {
+    if (R.IsBlack() && T.IsBlack()) return;
+    if (!R.IsBlack() || !T.IsBlack()) {
         if (remapRoughness) {
-            urough = TrowbridgeReitzDistribution::RoughnessToAlpha(urough);
-            vrough = TrowbridgeReitzDistribution::RoughnessToAlpha(vrough);
+            roughu = TrowbridgeReitzDistribution::RoughnessToAlpha(roughu);
+            roughv = TrowbridgeReitzDistribution::RoughnessToAlpha(roughv);
         }
         MicrofacetDistribution *distrib =
-            isSpecular ? nullptr
-                       : ARENA_ALLOC(arena, TrowbridgeReitzDistribution)(
-                             urough, vrough);
-        if (!R.IsBlack()) {
-            Fresnel *fresnel = ARENA_ALLOC(arena, FresnelDielectric)(1.f, eta);
-            if (isSpecular)
-                si->bsdf->Add(
-                    ARENA_ALLOC(arena, SpecularReflection)(R, fresnel));
-            else
-                si->bsdf->Add(ARENA_ALLOC(arena, MicrofacetReflection)(
-                    R, distrib, fresnel));
-        }
-        if (!T.IsBlack()) {
-            if (isSpecular) {
-                si->bsdf->Add(ARENA_ALLOC(arena, SpecularTransmission)(
-                    T, 1.f, eta, mode));
-            } else {
-                si->bsdf->Add(ARENA_ALLOC(arena, MicrofacetTransmission)(
-                    T, distrib, 1.f, eta, mode));
-            }
-        }
+            ARENA_ALLOC(arena, TrowbridgeReitzDistribution)(roughu, roughv);
+        si->bsdf->Add(ARENA_ALLOC(arena, FresnelBlend)(R, T, distrib));
     }
-
-    Spectrum sig_a = scale * sigma_a->Evaluate(*si).Clamp();
-    Spectrum sig_s = scale * sigma_s->Evaluate(*si).Clamp();
-    si->bssrdf = ARENA_ALLOC(arena, TabulatedBSSRDF)(*si, this, mode, eta,
-                                                     sig_a, sig_s, table);
 }
 
 FishMaterial *CreateFishMaterial(const TextureParams &mp) {
     Float Kd[3] = {.5, .5, .5};
-    Float sig_a_rgb[3] = {.0011f, .0024f, .014f},
-          sig_s_rgb[3] = {2.55f, 3.21f, 3.77f};
-    Spectrum sig_a = Spectrum::FromRGB(sig_a_rgb),
-             sig_s = Spectrum::FromRGB(sig_s_rgb);
-    std::string name = mp.FindString("name");
-    bool found = GetMediumScatteringProperties(name, &sig_a, &sig_s);
-    Float g = mp.FindFloat("g", 0.0f);
-    if (name != "") {
-        if (!found)
-            Warning("Named material \"%s\" not found.  Using defaults.",
-                    name.c_str());
-        else
-            g = 0; /* Enforce g=0 (the database specifies reduced scattering
-                      coefficients) */
-    }
-    std::shared_ptr<Texture<Spectrum>> sigma_a, sigma_s;
-    sigma_a = mp.GetSpectrumTexture("sigma_a", sig_a);
-    sigma_s = mp.GetSpectrumTexture("sigma_s", sig_s);
     std::shared_ptr<Texture<Spectrum>> kd =
         mp.GetSpectrumTexture("Kd", Spectrum::FromRGB(Kd));
     std::shared_ptr<Texture<Spectrum>> mfp =
         mp.GetSpectrumTexture("mfp", Spectrum(1.f));
+
+    Float g = mp.FindFloat("g", 0.0f);
     std::shared_ptr<Texture<Spectrum>> kr =
         mp.GetSpectrumTexture("Kr", Spectrum(1.f));
     std::shared_ptr<Texture<Spectrum>> kt =
@@ -154,9 +109,8 @@ FishMaterial *CreateFishMaterial(const TextureParams &mp) {
     Float eta = mp.FindFloat("eta", 1.33f);
     Float scale = mp.FindFloat("scale", 1.0f);
     bool remapRoughness = mp.FindBool("remaproughness", true);
-    return new FishMaterial(scale, sigma_a, sigma_s, kd, kr, kt, mfp, g, eta,
-                            roughu, roughv, bumpMap, opacity, color,
-                            remapRoughness);
+    return new FishMaterial(scale, kd, kr, kt, mfp, g, eta, roughu, roughv,
+                            bumpMap, opacity, color, remapRoughness);
 }
 
 }  // namespace pbrt
