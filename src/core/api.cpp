@@ -74,6 +74,7 @@
 #include "lights/spot.h"
 #include "materials/disney.h"
 #include "materials/fish.h"
+#include "materials/newt.h"
 #include "materials/fourier.h"
 #include "materials/glass.h"
 #include "materials/hair.h"
@@ -563,6 +564,8 @@ std::shared_ptr<Material> MakeMaterial(const std::string &name,
         material = CreateHairMaterial(mp);
     else if (name == "disney")
         material = CreateDisneyMaterial(mp);
+    else if (name == "newt")
+        material = CreateNewtMaterial(mp);
     else if (name == "fish")
         material = CreateFishMaterial(mp);
     else if (name == "mix") {
