@@ -34,20 +34,20 @@ void FishMaterial::ComputeScatteringFunctions(SurfaceInteraction *si,
     Spectrum Ctint = lum > 0 ? (c / lum) : Spectrum(1.);
     BxDF *diff = ARENA_ALLOC(arena, LambertianReflection)(c);
 
-    Spectrum R = op * Kd->Evaluate(*si).Clamp();
-    Spectrum T = op * Kt->Evaluate(*si).Clamp();
+    Spectrum D = op * Kd->Evaluate(*si).Clamp();
+    Spectrum S = op * Kt->Evaluate(*si).Clamp();
     Float roughu = uRoughness->Evaluate(*si);
     Float roughv = vRoughness->Evaluate(*si);
 
-    if (R.IsBlack() && T.IsBlack()) return;
-    if (!R.IsBlack() || !T.IsBlack()) {
+    if (D.IsBlack() && S.IsBlack()) return;
+    if (!D.IsBlack() || !S.IsBlack()) {
         if (remapRoughness) {
             roughu = TrowbridgeReitzDistribution::RoughnessToAlpha(roughu);
             roughv = TrowbridgeReitzDistribution::RoughnessToAlpha(roughv);
         }
         MicrofacetDistribution *distrib =
             ARENA_ALLOC(arena, TrowbridgeReitzDistribution)(roughu, roughv);
-        si->bsdf->Add(ARENA_ALLOC(arena, FresnelBlend)(R, T, distrib));
+        si->bsdf->Add(ARENA_ALLOC(arena, FresnelBlend)(D, S, distrib));
     }
 }
 
