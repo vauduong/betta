@@ -1,0 +1,68 @@
+
+LookAt 400 -200 0   0 0 0   0 0 1
+Rotate -5 0 0 1
+Camera "perspective" "float fov" [39]
+Film "image"  
+"integer xresolution" [400] "integer yresolution" [400]
+    "string filename" "betta-render.exr"
+
+
+Sampler "halton" "integer pixelsamples" [64]
+
+Integrator "path"
+
+WorldBegin
+
+#light
+AttributeBegin
+Material "matte" "color Kd" [0 0 0]
+Translate 150 0  300
+AreaLightSource "area"  "color L" [10 10 10] "integer nsamples" [8]
+Shape "sphere" "float radius" [50]
+AttributeEnd
+
+#light
+AttributeBegin
+Material "matte" "color Kd" [0 0 0]
+Translate 500 0  -50
+AreaLightSource "area"  "color L" [10 10 10] "integer nsamples" [8]
+Shape "sphere" "float radius" [10]
+AttributeEnd
+
+#HDR
+AttributeBegin
+LightSource "infinite" "integer samples" 8 "string mapname" ["textures/Milkyway_Light.exr"]
+AttributeEnd
+
+
+
+
+#mirror
+AttributeBegin
+  Translate -150 -100 0
+  Rotate  90 0 1 0
+  Material "mirror"
+  Shape "disk" "float radius" 100
+AttributeEnd
+
+
+#fish
+AttributeBegin
+Scale 25 25 25
+Rotate 90 1 0 0
+Translate 0 0 0
+    Texture "normalmap" "float" "imagemap"
+        "string filename" ["textures/BETTA_Normal_cleaned.png"]
+    Texture "opacitymap" "color" "imagemap"
+        "string filename" ["textures/BETTA_Opacity_gradient_2.png"]
+    Texture "colormap" "color" "imagemap"
+        "string filename" ["textures/BETTA_Base_Color.png"]
+    Texture "heightmap" "color" "imagemap"
+        "string filename" ["textures/BETTA_color_bw.png"]
+
+    #Material "newt" "color Kd" [.7 .125 .125] "color Ks" [.1 .1 .1] "float uroughness" .01 "float vroughness" .01 "texture bumpmap" "normalmap" "texture opacity" "opacitymap" "texture color" "colormap" 
+    
+    Material "fish" "texture Kd" "colormap" "texture Kt" "heightmap" "texture color" "colormap" "float eta" 1 "texture bumpmap" "normalmap" "texture opacity" "opacitymap" "float uroughness" 0.01 "float vroughness" 0.04
+    Include "geometry/betta.pbrt" 
+AttributeEnd
+WorldEnd
